@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "mini_lib.h": "c",
+        "errno.h": "c"
+    }
+}
