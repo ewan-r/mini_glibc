@@ -6,26 +6,28 @@
 struct malloc_element *malloc_list = NULL;
 
 void *mini_calloc(int size_element,int number_element){
-    void *p = sbrk(0);
-
-    if(sbrk(size_element*number_element) == (void*)-1) {
-        mini_perror("Error: sbrk failed");
-        mini_exit();
-    }
-    for(int i = 0;i<number_element;i++)
-        *((char*)p+i) = '\0';
 
     struct malloc_element *new_element = sbrk(24);
     if(sbrk(sizeof(struct malloc_element)) == (void*)-1) {
         mini_perror("Error: sbrk failed");
         mini_exit();
     }
-    new_element->p = p;
     new_element->size = size_element*number_element;
     new_element->statut = 1;
     new_element->next_malloc = NULL;
+    new_element->p = sbrk(new_element->size);
+    if(sbrk(new_element->size) == (void*)-1) {
+        mini_perror("Error: sbrk failed");
+        mini_exit();
+    }
+    for(int i = 0; i < new_element->size; i++){
+        *((char*)new_element->p+i) = '\0';  
+    }
 
-    if(malloc_list == NULL){
+    if(malloc_list == NULL || (malloc_list->size >= new_element->size&&malloc_list->statut == 0)){
+        if(malloc_list != NULL){
+            new_element->next_malloc = malloc_list;
+        }
         malloc_list = new_element;
     }
     else{
@@ -40,9 +42,7 @@ void *mini_calloc(int size_element,int number_element){
             new_malloc->next_malloc = new_element;
         }
         else{
-            new_malloc->p = new_element->p;
-            new_malloc->size = new_element->size;
-            new_malloc->statut = 1;
+            new_malloc = new_element;
         }
     }
     return new_element->p;

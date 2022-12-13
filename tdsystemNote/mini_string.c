@@ -8,32 +8,31 @@ int BUFF_SIZE = 1024;
 char *buffer = NULL;
 int ind = -1;
 
-void mini_printf(char* chaine){
-    if(buffer==NULL){
-        buffer = (char*)mini_calloc(sizeof(char),BUFF_SIZE);
-        ind = 0;
+void mini_printf(char* s) {
+  if(buffer == NULL) {
+    buffer = (char*) mini_calloc(BUFF_SIZE, sizeof(char));
+    ind = 0;
+  }
+  while(*s) {
+    buffer[ind] = *s;
+    ind++;
+    if (ind == BUFF_SIZE || *s == '\n') {
+      write(STDOUT_FILENO, buffer, ind);
+      
+      ind = 0;
     }
-    while(*chaine){
-        buffer[ind] = *chaine;
-        ind++;
-        if(ind == BUFF_SIZE || *chaine=='\n'){
-            if(write(STDOUT_FILENO,buffer,ind==-1)){
-                mini_perror("Error: write failed");
-                mini_exit();
-            }
-            ind = 0;
-        }
-        chaine++;
-    }
+    s++;
+  }
 }
 
-int mini_scanf(char *buffer, int size_buffer){
-    int i = read(STDIN_FILENO,buffer,size_buffer-1);
-    if(i==-1){
+int mini_scanf(char *buff, int size_buffer) {
+    int c = read(STDIN_FILENO, buff, size_buffer--); 
+    if(c == -1) {
         mini_perror("Error: read failed");
-        mini_exit();
+        return -1;
     }
-    return i;
+    *((char*)buff+c-1) = '\0';
+    return c;
 }
 
 int mini_strlen(char *s){
@@ -47,12 +46,13 @@ int mini_strlen(char *s){
 
 int mini_strcpy(char *s, char *d){
     int i = 0;
-    while(*s){
-        d=s;
+    while(*s){ 
+        *d=*s;
         s++;
         d++;
         i++;
     }
+    *d= '\0';
     return i;
 }
 
@@ -63,7 +63,7 @@ int mini_strcmp(char *s1, char *s2){
     if(size_s1 != size_s2) i = 1;
     else{
         while(*s1){
-            if(s1!=s2){
+            if(*s1!=*s2){
                 i=1;
                 break;
             }
@@ -77,7 +77,7 @@ int mini_strcmp(char *s1, char *s2){
 int mini_strncpy(char *s,char *d, int n){
     int i = 0;
     while(*s&&i<n){
-        d=s;
+        *d=*s;
         s++;
         d++;
         i++;
@@ -109,6 +109,7 @@ void mini_perror(char *message){
     mini_printf(message);
     mini_printf(": ");
     mini_printf(e);
+    mini_printf("\n");
 }
 
 char *mini_itoa(int n){
@@ -119,7 +120,7 @@ char *mini_itoa(int n){
         div = div/10;
         size++;
     }
-    char *s = (char*)mini_calloc(sizeof(char),size);
+    char *s = (char*)mini_calloc(1,size);
     for(i=size;i>=0;i--){
         s[i-1] = n%10 + '0';
         n = n/10;

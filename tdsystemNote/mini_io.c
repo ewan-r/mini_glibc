@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 int IOBUFFER_SIZE =  2048;
 struct MYFILE_ELEMENT *first = NULL;
@@ -74,6 +75,7 @@ int mini_fread (void* buffer,int size_element, int number_element, struct MYFILE
             }
             file->ind_read = 0;
         }
+        buffer++;
     }
     return nb_read;
 }
